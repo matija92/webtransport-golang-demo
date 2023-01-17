@@ -1,0 +1,7 @@
+*.h264
+*.key
+*.pem
+*.keyframe
+*.exe
+demo-app/node_modules/*
+oldkeys/

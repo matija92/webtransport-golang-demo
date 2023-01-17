@@ -1,0 +1,23 @@
+
+
+.Control {
+    display: flex;
+    background-color: #c24d2c;
+    justify-content: left;
+    font-size: 20px;
+    padding: 10px;
+    padding-right: 15px;
+    border: 1px black solid;
+}
+.Control-name {
+    margin-right: 15px;
+    flex-grow: 0.8;
+}
+
+.Button {
+}
+
+.Button-name {
+    flex-grow: 1;
+}
+  
