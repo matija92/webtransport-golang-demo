@@ -1,6 +1,6 @@
 #!/bin/bash
-FILE=./sample/640/sample-640.mp4
-FRAME_DIR=./sample/640/frames
+FILE=./sample/1280/sample-1280.mp4
+FRAME_DIR=./sample/1280/frames
 
 mkdir -p $FRAME_DIR
 

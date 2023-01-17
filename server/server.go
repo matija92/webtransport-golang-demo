@@ -14,7 +14,7 @@ import (
 
 var Cert = flag.String("cert", "certificate.pem", "Certificate in PEM format")
 var CertKey = flag.String("key", "certificate.key", "Certificate key")
-var FrameDir = flag.String("frame-dir", "../data/sample/640/frames/", "Directory with raw frames")
+var FrameDir = flag.String("frame-dir", "../data/sample/1280/frames/", "Directory with raw frames")
 
 func main() {
 	flag.Parse()
