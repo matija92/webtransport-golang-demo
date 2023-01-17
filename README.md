@@ -1,11 +1,15 @@
 # WebTransport & WebCodec API demo
 
-
 This is an experimental demo of sending raw h264 frames, decoding and rendering them in the browser, via a simple custom binary protocol, simulating a live stream scenario.
 
 The server is implemented in Golang using the [webtransport-go](https://github.com/adriancable/webtransport-go) library and the browser demo page is in React.
 
 This demo uses [WebTransport](https://web.dev/webtransport/) and [WebCodec](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API)  APIs.
+
+<p align="center">
+    <img src="demo-page.png" width="600">
+</p>
+
 
 **Disclaimer**: Due to WebTransport running over HTTP3/QUIC, the demo requires TLS authentication. 
 You will have to use a certificate issued by a known certificate authority, or alternatively, generate a self-signed certificate and use [Chromium](https://www.chromium.org/chromium-projects/) to run the demo locally.
@@ -20,8 +24,9 @@ You will have to use a certificate issued by a known certificate authority, or a
 
 ## Demo explanation
 
-- Pre-run scripts take an input mp4 file and extract all h264 frames as separate files using FFMpeg (sample video provided in `server/data/sample/640/sample-640.mp4`)
-- The Golang server loads all raw frames from disk into memory, and then adds minimal binary header information before serializing each frame. Specifically (`type`: [keyframe, delta], `timestamp`: <in_microseconds>), as required by `EncodedVideoCunk`([docs](https://developer.mozilla.org/en-US/docs/Web/API/EncodedVideoChunk))
+- Pre-run scripts take an input mp4 file and extracts all h264 frames as separate files, using FFMpeg. A few sample videos are provided in `data/` directory
+- The server loads all raw frames from disk into memory, and loops the video whenever a client connects
+-  A 14 byte binary header is added, with aditional information about the frame, before serialization. The header contains (`type`: [keyframe, delta], `timestamp`: <in_microseconds>), as required by `EncodedVideoCunk`([docs](https://developer.mozilla.org/en-US/docs/Web/API/EncodedVideoChunk))
 ```Golang
 type FrameType uint16
 
@@ -32,7 +37,7 @@ const (
 
 type FrameHeader struct {
 	Type      FrameType
-	Timestamp uint64
+	Timestamp uint64 // in microseconds
 	Size      uint32
 }
 ```
@@ -94,5 +99,3 @@ yarn start
 ```
 
 Open `localhost:3000`
-
-![Demo page](demo-page.png)
