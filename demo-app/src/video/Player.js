@@ -15,12 +15,12 @@ const streamOptions =
     id: ""
   },
   {
-    text:"Bidirectional (stream)",
-    id: "bidi"
+    text:"Unidirectional (stream)",
+    id: "unis"
   },
   {
     text:"Unidirectional (datagram)",
-    id: "uni"
+    id: "unid"
   }
 ]
 
@@ -31,7 +31,7 @@ const streamOptions =
 
     // WebTransport functions
     async function connect() {
-      await inititializeWebtransport("https://localhost:4433/live")
+      await inititializeWebtransport("https://localhost:4433/control")
     }
 
     async function inititializeWebtransport(url) {
@@ -39,32 +39,54 @@ const streamOptions =
       await transport.ready;
       setConn(transport)
       console.log("Connection ready!")
+      await createBidiStream(transport)
     }
 
-    function closeStream() {
+    function closeSession() {
+      sendCommand(4)
       conn.close()
     }
 
-    function createStream(e) {
+    async function changeSession(e) {
       switch (e.target.value) {
-        case "bidi":
-          createBidiStream()
-        case "uni":
-          // TODO
+        case "unis":
+          await sendCommand(1)
+          receiveFromUniStream()
+        case "unid":
+          await sendCommand(2)
+          receiveFromDatagrams()
           break
         default:
           break
       }
     }
 
-    async function createBidiStream() {
+    async function receiveFromDatagrams() {
+      const datagams = conn.datagrams.readable;
+
+      renderFromStream(datagams)
+    }
+
+
+    async function receiveFromUniStream() {
+      const uds = conn.incomingUnidirectionalStreams;
+      const reader = uds.getReader()
+
+      const {value, done} = await reader.read();
+      if (done) {
+        return
+      }
+
+      renderFromStream(value)
+    }
+
+    async function createBidiStream(conn) {
       const stream = await conn.createBidirectionalStream()
       if (!stream ) {
         console.error("Fatal error - could not create bidi stream")
         return
       }
       setBidiStream(stream)
-      await readFromBidiStream(stream)
     }
 
 
@@ -98,9 +120,14 @@ const streamOptions =
     }
     
 
-  
-    async function readFromBidiStream(stream) {
-      const reader = await stream.readable.getReader()
+    async function sendCommand(c) {
+      const writer = await bidiStream.writable.getWriter()
+      writer.write(Uint8Array.from([c]).buffer)
+    }
+
+    
+    async function renderFromStream(stream) {
+      const reader = await stream.getReader()
       const decoder = await inititalizeVideoDecoder()
 
 
@@ -121,17 +148,25 @@ const streamOptions =
               
               frameBuffer.push(...value)
 
+              if (frameBuffer.length < 256) {
+                continue
+              }
+
 
               // If current chunk is undefined/null, start reading frame headers
               if (!chunk) {
                 const arr = Uint8Array.from(frameBuffer)
                 const dataview = new DataView(arr.buffer)
-                const t = getType(dataview.getUint16(0))
+                let t = ""
+                try {
+                  t = getType(dataview.getUint16(0))
+                } catch (error) {
+                  frameBuffer.splice(0, 2)
+                  continue
+                }
+
                 const ts = Number(dataview.getBigUint64(2))
                 currentSize = dataview.getUint32(10)
-                if (t == "") {
-                  console.warn("invalid data, potential packet loss")
-                }
 
                 chunk = {
                   type: t,
@@ -172,7 +207,7 @@ const streamOptions =
         case 65535:
           return "delta"
         default:
-          return ""
+          throw new Error("Invalid frame type")
       }
     }
 
@@ -180,13 +215,13 @@ const streamOptions =
       <div className='Player'>
           <div className='Player-controls'>
             <Button name="Open WebTransport session" text="Open" onClickHandler={connect} />
-            <Dropdown name="Pick stream" onSelectHandler={createStream}
+            <Dropdown name="Pick stream" onSelectHandler={changeSession}
               options={streamOptions}>
             </Dropdown>
 
             <Dropdown name="Rendering method"  options={[{id: "c", text: "Canvas"}]}/>
 
-            <Button name="Close stream" text="Close" onClickHandler={closeStream} />
+            <Button name="Close stream" text="Close" onClickHandler={closeSession} />
           </div>
          <div className='Player-video'>
           <canvas id="test" ></canvas>
