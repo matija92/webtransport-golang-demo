@@ -1,0 +1,14 @@
+
+.Log {
+  background-color: #1a2639;
+}
+
+.Log-item {
+  display: flex;
+  flex-direction: column;
+  background-color: #1a2639;
+  color:  #eeeeee;
+  flex-grow:0.05;
+  text-align: left;
+  font-size: 2vh;
+}

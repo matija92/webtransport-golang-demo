@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import "./Player.css"
+import Log from "./Log"
 import Dropdown from "./controls/Dropdown"
 import Button from './controls/Button';
 
@@ -27,6 +28,13 @@ const streamOptions =
  function Player() {
     const [conn, setConn] = useState(null)
     const [bidiStream, setBidiStream] = useState(null)
+    const [logs, setLogs] = useState([])
+    let l = ["henlo"]
+
+    useEffect(()=>{
+      console.log("Logs set")
+      console.log(logs)
+  }, [logs])
 
 
     // WebTransport functions
@@ -34,15 +42,29 @@ const streamOptions =
       await inititializeWebtransport("https://localhost:4433/control")
     }
 
+    function log(msg) {
+      console.log(msg)
+      l.push(msg)
+      setLogs(l)
+    } 
+
+    function logError() {
+      console.error(msg)
+      l.push(msg)
+      setLogs(l)
+    }
+
     async function inititializeWebtransport(url) {
+      log(`Initializing WebTransport connection to ${url}`)
       let transport = new WebTransport(url);
       await transport.ready;
       setConn(transport)
-      console.log("Connection ready!")
+      log("Connection ready!")
       await createBidiStream(transport)
     }
 
     function closeSession() {
+      log("Closing WebTransport session")
       sendCommand(4)
       conn.close()
     }
@@ -50,9 +72,11 @@ const streamOptions =
     async function changeSession(e) {
       switch (e.target.value) {
         case "unis":
+          log(`Requesting unidirectional stream`)
           await sendCommand(1)
           receiveFromUniStream()
         case "unid":
+          log(`Requesting datagram stream`)
           await sendCommand(2)
           receiveFromDatagrams()
           break
@@ -76,16 +100,17 @@ const streamOptions =
       if (done) {
         return
       }
-
+      log(`Unidirectional stream received`)
       renderFromStream(value)
     }
 
     async function createBidiStream(conn) {
       const stream = await conn.createBidirectionalStream()
       if (!stream ) {
-        console.error("Fatal error - could not create bidi stream")
+        logError("Fatal error - could not create bidi stream")
         return
       }
+      log("Control stream established")
       setBidiStream(stream)
     }
 
@@ -105,7 +130,7 @@ const streamOptions =
         frame.close();
       } ,
       error: (e) => {
-        console.log(e.message);
+        logError(e.message);
       },
     };
 
@@ -141,7 +166,7 @@ const streamOptions =
         while (true) {
               const {value, done} = await reader.read();
               if (done) {
-                console.info("Bidi stream is done")
+                log("Stream is done")
                 break;
               }
 
@@ -192,10 +217,8 @@ const streamOptions =
           }
 
       } catch (e) {
-        console.log(`Error reading from stream ${e}`)
+        logError(`Error reading from stream ${e.msg}`)
       }
-      
-      console.info("Exiting bidi stream reader")
     }
 
     
@@ -225,6 +248,9 @@ const streamOptions =
           </div>
          <div className='Player-video'>
           <canvas id="test" ></canvas>
+         </div>
+         <div className='Player-logs'>
+            <Log logs={logs} />
          </div>
           
       </div>
