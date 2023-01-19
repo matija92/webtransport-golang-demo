@@ -6,7 +6,7 @@ function Dropdown(props){
         <div className="Control">
           <div className="Control-name">{props.name}</div>
           
-          <select name="cars" id="cars" onChange={props.onSelectHandler}>
+          <select name={props.id} id={props.id} onChange={props.onSelectHandler}>
             {
               props.options.map(item => <option value={item.id} key={item.id}>{item.text}</option>)
             }

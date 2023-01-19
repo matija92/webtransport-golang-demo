@@ -10,12 +10,7 @@ function App() {
         <p>WebTransport & WebCodec API Demo</p>
       </div>
       <Player className='App-player' />
-      <div className='App-logs'>
-        <p>Logs TBD</p>
       </div>
-      </div>
-      
-
     </div>
   );
 }

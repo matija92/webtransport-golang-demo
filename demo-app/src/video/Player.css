@@ -4,7 +4,7 @@
   background-color: #3e4a61;
   color: white;
   flex-direction: column;
-  flex-grow: 1;
+  flex-grow: 0.8;
   width: 100%;
 }
 
@@ -19,8 +19,17 @@
 .Player-video {
   display: flex;
   background-color: #3e4a61;
-  flex-grow: 1;
+  flex-grow: 0.8;
   justify-content: center;
   align-items: center;
  
+}
+
+.Player-logs {
+  display: flex;
+  flex-direction: column;
+  background-color: #1a2639;
+  width: 100%;
+  color: #d9dad7;
+  flex-grow: 0.3;
 }

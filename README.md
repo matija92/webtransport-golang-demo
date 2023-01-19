@@ -57,7 +57,7 @@ type FrameHeader struct {
 ```bash
     openssl x509 -pubkey -noout -in certificate.pem |
                 openssl rsa -pubin -outform der |
-                openssl dgst -sha256 -binary | base640
+                openssl dgst -sha256 -binary | base64
 ```
     The result should be a base64-encoded blob that looks like this:
         "Gi/HIwdiMcPZo2KBjnstF5kQdLI5bPrYJ8i3Vi6Ybck="

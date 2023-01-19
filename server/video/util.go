@@ -1,4 +1,4 @@
-package main
+package video
 
 import (
 	"io"
@@ -8,24 +8,6 @@ import (
 	"sort"
 	"strings"
 )
-
-type FrameType uint16
-
-const (
-	Key   FrameType = 0x0001
-	Delta FrameType = 0xffff
-)
-
-type FrameHeader struct {
-	Type      FrameType
-	Timestamp uint64
-	Size      uint32
-}
-
-type Frame struct {
-	Header FrameHeader
-	Data   []byte
-}
 
 const FrameRate = float64(1) / 30
 
